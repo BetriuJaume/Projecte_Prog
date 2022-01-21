@@ -46,5 +46,5 @@ st.write('14. **Tobacco_yes_no**: Smoking habit present during the life of the p
 st.write('15.-25. Has the patient suffered any disease related to the name of the column?')
 st.write('17. **DM**: Diabetes Mellitus')
 
-st.write('coses escrites moltes moltes')
+st.write('coses escrites')
 
