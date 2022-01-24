@@ -7,6 +7,8 @@ import auxiliary_functions as af
 import matplotlib.pyplot as plt
 from scipy.stats import chisquare
 from scipy.stats import chi2_contingency
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
 
 
 st.set_page_config(layout="wide")
@@ -17,7 +19,7 @@ dades=pd.read_spss(r'C:\Users\Jaume\Desktop\Exactes\Projecte_Prog\EarlyLifeCovid
 
 st.write('Our database consists on data about patients from the Hospital Clínic de Barcelona and our objective will be to build a machine learning model capable of predicting the severity of symtoms of the disease in patients')
 st.write('The original Data Base looks like this:')
-if st.checkbox('Show original data'):
+with st.expander('Show original data'):
   st.write(dades.head(10))
 
 st.write('The first thing we will do is translate to english the data. The translated data set is:')
@@ -34,10 +36,10 @@ dades.columns=pd.Index(['ID', 'UCI', 'IUGR_missing', 'Age', 'Gender', 'Size', 'W
        'Obesity', 'Kidney_disease', 'Autoimmune', 'Cancer', 'Thyroid', 'Infectious',
        'Psychiatric'])
 
-if st.checkbox('Show translated data'):
+with st.expander('Show translated data'):
   st.write(dades.head(10))
 
-if st.checkbox('Information about the columns'):
+with st.expander('Information about the columns'):
   st.header('Brief explanation of the variables')
   st.write('If we look at the columns we will see that we have information about:')
   st.write('1. **ID**: Identification of the patient')
@@ -171,7 +173,7 @@ p_values=pd.DataFrame(p_values, index=dades_categoriques.columns.values, columns
 
 
 
-if st.checkbox('See here the heatmap of the p-values'):
+with st.expander('See here the heatmap of the p-values'):
   mask = np.triu(np.ones_like(p_values, dtype=np.bool))
   for i in range(mask.shape[0]):
     mask[i,i]=False
@@ -194,13 +196,49 @@ st.write('3. **Diabetes** is related with **Dyslipidemia** and **Obesity** as we
 st.write('4. **Tobacco** is related obiously to developing some kinf of **cancer**')
 st.write('5. **Hipertension** diseases have a high correlation with the **UCI** variable')
 
+
 st.header('Machine learning modeling of the data')
+st.write('In this part of the project our objective is to use machine learning techinques to predict the severity of symtoms. We will divide our data in a train sample (80 %) and a test sample (20 %) to test if the model works well with unseen data')
+
+st.code('''dades_train = dades.sample(frac=0.8, random_state=25).drop('ID',axis=1)
+dades_test = dades.drop(dades_train.index).drop('ID',axis=1)''')
+dades_train = dades.sample(frac=0.8, random_state=25).drop('ID',axis=1)
+dades_test = dades.drop(dades_train.index).drop('ID',axis=1)
+st.write('The first model we will train is a logistic regression with all the predictors and we get the information:')
+
+variables='+'.join(dades_train.columns.difference(['UCI','BW','IUGR_missing']))
+formula='UCI~'+variables
+model_log=smf.glm(formula=formula,data=dades_train,family=sm.families.Binomial()).fit()
+
+with st.expander('Check the summary of the model: Logistic regression with the raw data'):
+  st.write(model_log.summary())
+st.write(' and trying different margins for the probability decision we get this precisions:')
+
+with st.expander('Check the different precisions'):
+  prediccions_prob=model_log.predict(dades_test)
+  nombres=[]
+  for i in range(1,20):
+    nombres.append(i/20)
+  for i in nombres:
+    prediccions=['No' if x>i else 'Yes' for x in prediccions_prob]
+    st.write('Margin of decission '+'**'+str(i)+'**')
+    pr_yes, pr_no, pr_tot=af.precisions(dades_test['UCI'],prediccions)
+    st.write(pr_yes)
+    st.write(pr_no)
+    st.write(pr_tot)
+    st.write('________________________________________________')
+
+st.write('We can see that we get high precisions in the case of the patients that did not suffer big complications during the disease. Unfortunately we get bad results in the accuracy predicting the cases that the patient will end up in the UCI wich is the thing that interests us. The best results that we get with this model are for the margin 0.8')
+
+col_5,col_6=st.columns(2)
+with col_6:
+  st.write('This might be caused because the data that we are exploring is unbalanced:')
+  st.write('Looking at the graphic we can see that we have arround 6 times more patients with no complications that with complications')
+with col_5:
+  fig, ax=plt.subplots(figsize=(8,6))
+  plt.bar(['No','Si'],[len(dades[dades['UCI']=='No']),len(dades[dades['UCI']=='Yes'])],width=0.5,color=['blue','orange'],linewidth=5)
+  st.write(fig)
+st.write('In the other hand we have too much predictors for the amount of data that we are using and I am afraid that I might me overfitting the model with the chose of the margin of decision 0.8')
 
 
-
-
-
-
-
-
-st.header('Deep learning model of the data using Neural Networks(nn)')
+st.header('Deep learning model of the data using Neural Networks (nn)')
