@@ -231,14 +231,17 @@ with st.expander('Check the different precisions'):
 st.write('We can see that we get high precisions in the case of the patients that did not suffer big complications during the disease. Unfortunately we get bad results in the accuracy predicting the cases that the patient will end up in the UCI wich is the thing that interests us. The best results that we get with this model are for the margin 0.8')
 
 col_5,col_6=st.columns(2)
-with col_6:
+with col_5:
   st.write('This might be caused because the data that we are exploring is unbalanced:')
   st.write('Looking at the graphic we can see that we have arround 6 times more patients with no complications that with complications')
-with col_5:
-  fig, ax=plt.subplots(figsize=(8,6))
-  plt.bar(['No','Si'],[len(dades[dades['UCI']=='No']),len(dades[dades['UCI']=='Yes'])],width=0.5,color=['blue','orange'],linewidth=5)
+  st.write('')
+with col_6:
+  fig, ax=plt.subplots(figsize=(8,3))
+  plt.bar(['No','Si'],[len(dades[dades['UCI']=='No']),len(dades[dades['UCI']=='Yes'])],width=0.5,color=['blue','orange'],linewidth=4)
   st.write(fig)
-st.write('In the other hand we have too much predictors for the amount of data that we are using and I am afraid that I might me overfitting the model with the chose of the margin of decision 0.8')
+st.write('In the other hand we have too much predictors for the amount of data that we are using and I am afraid that we might me overfitting the model with the chose of the margin of decision 0.8')
 
+st.subheader('Resampling to balance the data')
+st.write('We will use resampling techniques to balance the data. Specifically we will use **Upsampling** and **SMOTENC**')
 
 st.header('Deep learning model of the data using Neural Networks (nn)')
