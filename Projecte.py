@@ -381,7 +381,6 @@ st.write('**Very important:** I have the exact same problem with the library tor
 
 st.header('Conclusions of the project')
 
-
 st.write('About the predictors looking at the summary of the upsampling logistic regression we can determine the following:')
 st.write('1. Having a lower birth weight than the expected has a big impact in the probability of suffering complications')
 st.write('2. Men are more likely to end up in the UCI if positive of covid')
@@ -395,3 +394,5 @@ taula=pd.DataFrame({'Yes':[0.82,0.73,0.55,0.73,0.73,0.81],'No':[0.60,0.70,0.54,0
 taula.index=['Logistic reg. with waw data and predictors','Logistic reg. Upsampled','Logistic reg. SMOTENC','R.F. Upsampling','R.F. SMOTENC','Neural Network SMOTENC']
 st.table(taula)
 st.write('The first model has good results but we can not relly on this model because there is a high risk of overfitting. The model that seems to have the best results is Random Forest with the upsampled training set or the neural network in the case of the patients that will suffer complications. We would suggest the hospital to use a mix of the two models for predicting.')
+
+st.write('The last conclusion is that Naural Networks have huge predicting potencial and I am sure that with a more deep study and modeling of the Net we could get better precisions for our data. If we just keep trying to train the Network without changing anything due to the randomness of the DataLoader we get precisions better that the ones we already have so that makes me conclude that with more data that might be abailable in the future we can train deep neural networks that can fit the data **up to precisions of 0.9**.')
