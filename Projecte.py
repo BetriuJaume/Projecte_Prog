@@ -329,7 +329,7 @@ st.write('We will be using the library h2o for the RF model because this library
 st.write('* **ntrees=500**, we will train a high amount of trees to avoid overfitting')
 st.write('* **max_depth=20**, we will set the maximum depth of the trees to be 20 because of the numer of predictors that we have')
 st.write('* **min_rows=20**, minimum of patients that has to contain a node to split')
-st.write('* **mtries=-1**, the amount of random predictors used to grow the trees is set to p^(1/2) beeing p the number of predictors beacuse we are doing classification')
+st.write('* **mtries=-1**, the amount of random predictors used to grow the trees is set to p^(1/2) beeing p the number of predictors. This is generaly the best choice for classification problems')
 
 st.write('If we run the code we get the following results:')
 with st.expander('Results:'):
@@ -343,10 +343,40 @@ with st.expander('Results:'):
   st.write('Precision for the No: 0.6323529411764706')
   st.write('Total precission: 0.6455696202531646')
 
-st.write('**Very important:** The library h2o is not working in VS and I have tried to fix it but nothing seems to work, the code of this part will be in a colab notebook in the repository of the project named **RandomForest_Code**')
+st.write('**Very important:** The library h2o is not working in VS and I have tried to fix it but nothing seems to work, the code of this part will be in a colab notebook in the repository of the project named **RandomForest_Code and NN**')
 
 st.header('Deep learning model of the data using Neural Networks (nn)')
 st.write('To end the project we will try to fit a simple neural network to our data to see if we can improve the results. The fist thing we have to do is change the captegorical predictors to numerical ones and create PyTorch tensors from the data')
+st.write('Once done this we will train the network with the upsampled data and SMOTENC data. For the moment we will use all the predictors. If we look at the code we will see that the used activation function for the layer is the ReLu function that is reccomended for classification problems.')
 
+with st.expander('Graphic of the activation ReLU function'):
+  x=np.linspace(-10,10,100)
+  y=list(map(af.ReLU,x))
+  fig,ax=plt.subplots(figsize=(8,5))
+  plt.plot(x,y,'r')
+  plt.title('ReLU(x)=max(0,x)')
+  st.write(fig)
 
+st.write('We will use **ADAM** optimizer with a learing rate of 0.0001 and the **negative logaritmic likehood** for the loss function. Training the model with the diferent data sets and filtering the results that fit better our objective we get the following accuracies:')
+with st.expander('Best results of the NN in the validation set'):
+  st.write('SMOTENC training set')
+  st.write('Accuracy Yes 0.9 with rep=29')
+  st.write('Accuracy No 0.7017543859649122 with rep=29')
 
+  st.write('Upsampled training set')
+  st.write('Accuracy Yes 0.847457627118644 with rep=26')
+  st.write('Accuracy No 0.5416666666666666 with rep=26')
+
+st.write('We will use this results from the validation set to adjust the hiperparameters of the NN and use the model to get predictions from the test data to get a final accuracy. We chose rep=29. We will consider just the NN trained with the SMOTENC sample because it is the one that works better')
+with st.expander('Results in the Test dataset with rep=29'):
+  st.write('Accuracy Yes 0.8181818181818182 with rep=29')
+  st.write('Accuracy No 0.5147058823529411 with rep=29')
+
+st.write('**Very important:** I have the exact same problem with the library torch in VS so the code for this part will be in a colab notebook in the repository of the project named **RandomForest_Code and NN**')
+
+st.header('Conclusions of the project')
+st.write('The next table displays the models that have worked better for the project')
+taula=pd.DataFrame({'Yes':[0.82,0.73,0.55,0.73,0.73,0.81],'No':[0.60,0.70,0.54,0.76,0.63,0.51]})
+taula.index=['Logistic reg. with waw data and predictors','Logistic reg. Upsampled','Logistic reg. SMOTENC','R.F. Upsampling','R.F. SMOTENC','Neural Network SMOTENC']
+st.table(taula)
+st.write('')
