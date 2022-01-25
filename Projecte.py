@@ -9,7 +9,8 @@ from scipy.stats import chisquare
 from scipy.stats import chi2_contingency
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
-
+from sklearn.utils import resample
+from imblearn.over_sampling import SMOTENC
 
 st.set_page_config(layout="wide")
 st.title('Machine and Deep learning techinques to predict the severity of symptoms in Covid patients')
@@ -233,15 +234,119 @@ st.write('We can see that we get high precisions in the case of the patients tha
 col_5,col_6=st.columns(2)
 with col_5:
   st.write('This might be caused because the data that we are exploring is unbalanced:')
-  st.write('Looking at the graphic we can see that we have arround 6 times more patients with no complications that with complications')
+  st.write('Looking at the graphic we can see that we have arround 5 times more patients with no complications that with complications')
   st.write('')
 with col_6:
   fig, ax=plt.subplots(figsize=(8,3))
-  plt.bar(['No','Si'],[len(dades[dades['UCI']=='No']),len(dades[dades['UCI']=='Yes'])],width=0.5,color=['blue','orange'],linewidth=4)
+  plt.bar(['No','Si'],[len(dades_train[dades_train['UCI']=='No']),len(dades_train[dades_train['UCI']=='Yes'])],width=0.5,color=['blue','orange'],linewidth=4)
   st.write(fig)
-st.write('In the other hand we have too much predictors for the amount of data that we are using and I am afraid that we might me overfitting the model with the chose of the margin of decision 0.8')
+st.write('In the other hand we have too much predictors for the amount of data that we are using and I am afraid that we might me overfitting the model with the chose of the margin of decision 0.9')
 
 st.subheader('Resampling to balance the data')
-st.write('We will use resampling techniques to balance the data. Specifically we will use **Upsampling** and **SMOTENC**')
+
+st.write('We will use resampling techniques to balance the data. Specifically we will use **Upsampling** and **SMOTENC**. Once done the resampling we get better balanced data:')
+dades_train_UCI_No=dades_train[dades_train['UCI']=='No']
+dades_train_UCI_Yes=dades_train[dades_train['UCI']=='Yes']
+dades_UCI_Yes_upsampled=resample(dades_train_UCI_Yes,replace=True,n_samples=len(dades_train_UCI_No),random_state=123)
+dades_train_upsampled=pd.concat([dades_train_UCI_No,dades_UCI_Yes_upsampled])
+
+categ_indexes=[0,2,7,8]+list(range(10,dades_train.shape[1]-1))
+smot = SMOTENC(categorical_features=categ_indexes, random_state=123)
+dades_train_SMOTENC, dades_train_SMOTENC_UCI = smot.fit_resample(dades_train.drop('UCI',axis=1), dades_train['UCI'])
+dades_train_SMOTENC['UCI']=dades_train_SMOTENC_UCI
+
+col_7, col_8=st.columns(2)
+with col_7:
+  fig, ax=plt.subplots(figsize=(8,5))
+  plt.bar(['No','Si'],[len(dades_train_upsampled[dades_train_upsampled['UCI']=='No']),len(dades_train_upsampled[dades_train_upsampled['UCI']=='Yes'])],width=0.5,color=['blue','green'],linewidth=4)
+  plt.title('Upsampled data')
+  st.write(fig)
+with col_8:
+  fig, ax=plt.subplots(figsize=(8,5))
+  plt.bar(['No','Si'],[len(dades_train_SMOTENC[dades_train_SMOTENC['UCI']=='No']),len(dades_train_SMOTENC[dades_train_SMOTENC['UCI']=='Yes'])],width=0.5,color=['blue','orange'],linewidth=4)
+  plt.title('SMOTENC data:')
+  st.write(fig)
+
+st.write('Now we will use this new data to train the models')
+st.subheader('Training logistic regresion with the Upsampled data:')
+st.write('First we train the model with all the variables and we will eliminate the ones with a p-value higher than 0.05')
+
+model_log_upsampling=smf.glm(formula=formula,data=dades_train_upsampled,family=sm.families.Binomial()).fit()
+with st.expander('Summary of the model'):
+  st.write(model_log_upsampling.summary())
+st.write('Then we can eliminate all the variables that are not helping us and train another model:')
+formula_simple='UCI~BW_2500+Gender+Hipertension+Obesity+Age+IMC'
+model_log_upsampling_simple=smf.glm(formula=formula_simple,data=dades_train_upsampled,family=sm.families.Binomial()).fit()
+with st.expander('Summary of the simplyfied model'):
+  st.write(model_log_upsampling_simple.summary())
+st.write('And we obtain our predictions:')
+
+with st.expander('Check the different precisions'):
+  prediccions_prob=model_log_upsampling_simple.predict(dades_test)
+  nombres=[]
+  for i in range(1,20):
+    nombres.append(i/20)
+  for i in nombres:
+    prediccions=['No' if x>i else 'Yes' for x in prediccions_prob]
+    st.write('Margin of decission '+'**'+str(i)+'**')
+    pr_yes, pr_no, pr_tot=af.precisions(dades_test['UCI'],prediccions)
+    st.write(pr_yes)
+    st.write(pr_no)
+    st.write(pr_tot)
+    st.write('________________________________________________')
+st.write('The best results that we get considering that our interest is in predicting tha cases that the patient will end up in the UCI are with a margin of 0.5')
+
+st.subheader('Training logistic regression with the SMOTENC data:')
+st.write('First we train our model with all the variables and we eliminate the ones with a p-values higher than 0.05')
+
+variables='+'.join(dades_train_SMOTENC.columns.difference(['UCI','BW','IUGR_missing']))
+formula='UCI~'+variables
+model_log_SMOTENC=smf.glm(formula=formula,data=dades_train_SMOTENC,family=sm.families.Binomial()).fit()
+
+with st.expander('Summary of the model'):
+  st.write(model_log_SMOTENC.summary())
+st.write('We eliminate the predictors that are not aporting information and we train a new model:')
+formula_simplificada_SMOTENC='UCI~BW_2500+Cancer+DM+Dyslipidemia+Gender+Hipertension+Obesity+Psychiatric+Age'
+model_log_SMOTENC_simplificat=smf.glm(formula=formula_simplificada_SMOTENC,data=dades_train_SMOTENC,family=sm.families.Binomial()).fit()
+
+with st.expander('Check the different precisions'):
+  prediccions_prob=model_log_SMOTENC_simplificat.predict(dades_test)
+  nombres=[]
+  for i in range(1,20):
+    nombres.append(i/20)
+  for i in nombres:
+    prediccions=['No' if x>i else 'Yes' for x in prediccions_prob]
+    st.write('Margin of decission '+'**'+str(i)+'**')
+    pr_yes, pr_no, pr_tot=af.precisions(dades_test['UCI'],prediccions)
+    st.write(pr_yes)
+    st.write(pr_no)
+    st.write(pr_tot)
+    st.write('________________________________________________')
+st.write('It looks that this model is not working as good as we expected, but the best results we get are with the margin of 0.7')
+
+st.subheader('Random forest with the library h2o')
+st.write('We will be using the library h2o for the RF model because this library works very well with categorical values. We will train two different models with the two different resampled data and we will be using the same important variables that we got in the logistic regressions. We will use the next hiperparameters:')
+st.write('* **ntrees=500**, we will train a high amount of trees to avoid overfitting')
+st.write('* **max_depth=20**, we will set the maximum depth of the trees to be 20 because of the numer of predictors that we have')
+st.write('* **min_rows=20**, minimum of patients that has to contain a node to split')
+st.write('* **mtries=-1**, the amount of random predictors used to grow the trees is set to p^(1/2) beeing p the number of predictors beacuse we are doing classification')
+
+st.write('If we run the code we get the following results:')
+with st.expander('Results:'):
+  st.write('Upsampling')
+  st.write('Precision for the Yes: 0.7272727272727273')
+  st.write('Precision for the No: 0.7647058823529411')
+  st.write('Total precission: 0.759493670886076')
+  st.write('___________________________________')
+  st.write('SMOTENC:')
+  st.write('Precision for the Yes: 0.7272727272727273')
+  st.write('Precision for the No: 0.6323529411764706')
+  st.write('Total precission: 0.6455696202531646')
+
+st.write('**Very important:** The library h2o is not working in VS and I have tried to fix it but nothing seems to work, the code of this part will be in a colab notebook in the repository of the project named **RandomForest_Code**')
 
 st.header('Deep learning model of the data using Neural Networks (nn)')
+st.write('To end the project we will try to fit a simple neural network to our data to see if we can improve the results. The fist thing we have to do is change the captegorical predictors to numerical ones and create PyTorch tensors from the data')
+
+
+
