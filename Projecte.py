@@ -12,7 +12,8 @@ import statsmodels.formula.api as smf
 from sklearn.utils import resample
 from imblearn.over_sampling import SMOTENC
 
-st.set_page_config(layout="wide")
+primaryColor="#F63366"
+
 st.title('Machine and Deep learning techinques to predict the severity of symptoms in Covid patients')
 st.subheader('Programming project')
 st.subheader('Jaume Betriu, Verona February 2022')
@@ -309,6 +310,10 @@ st.write('We eliminate the predictors that are not aporting information and we t
 formula_simplificada_SMOTENC='UCI~BW_2500+Cancer+DM+Dyslipidemia+Gender+Hipertension+Obesity+Psychiatric+Age'
 model_log_SMOTENC_simplificat=smf.glm(formula=formula_simplificada_SMOTENC,data=dades_train_SMOTENC,family=sm.families.Binomial()).fit()
 
+with st.expander('Summary of the simplyfied model'):
+  st.write(model_log_SMOTENC_simplificat.summary())
+st.write('And we obtain the predictions')
+
 with st.expander('Check the different precisions'):
   prediccions_prob=model_log_SMOTENC_simplificat.predict(dades_test)
   nombres=[]
@@ -360,23 +365,33 @@ with st.expander('Graphic of the activation ReLU function'):
 st.write('We will use **ADAM** optimizer with a learing rate of 0.0001 and the **negative logaritmic likehood** for the loss function. Training the model with the diferent data sets and filtering the results that fit better our objective we get the following accuracies:')
 with st.expander('Best results of the NN in the validation set'):
   st.write('SMOTENC training set')
-  st.write('Accuracy Yes 0.9 with rep=29')
-  st.write('Accuracy No 0.7017543859649122 with rep=29')
+  st.write('Accuracy Yes: 0.9 with rep=29')
+  st.write('Accuracy No: 0.7017543859649122 with rep=29')
 
   st.write('Upsampled training set')
-  st.write('Accuracy Yes 0.847457627118644 with rep=26')
-  st.write('Accuracy No 0.5416666666666666 with rep=26')
+  st.write('Accuracy Yes: 0.847457627118644 with rep=26')
+  st.write('Accuracy No: 0.5416666666666666 with rep=26')
 
 st.write('We will use this results from the validation set to adjust the hiperparameters of the NN and use the model to get predictions from the test data to get a final accuracy. We chose rep=29. We will consider just the NN trained with the SMOTENC sample because it is the one that works better')
 with st.expander('Results in the Test dataset with rep=29'):
-  st.write('Accuracy Yes 0.8181818181818182 with rep=29')
-  st.write('Accuracy No 0.5147058823529411 with rep=29')
+  st.write('Accuracy Yes: 0.8181818181818182 with rep=29')
+  st.write('Accuracy No: 0.5147058823529411 with rep=29')
 
 st.write('**Very important:** I have the exact same problem with the library torch in VS so the code for this part will be in a colab notebook in the repository of the project named **RandomForest_Code and NN**')
 
 st.header('Conclusions of the project')
+
+
+st.write('About the predictors looking at the summary of the upsampling logistic regression we can determine the following:')
+st.write('1. Having a lower birth weight than the expected has a big impact in the probability of suffering complications')
+st.write('2. Men are more likely to end up in the UCI if positive of covid')
+st.write('3. Hipertension has a big impact too in the probability of suffering complications')
+st.write('4. Age is obiously a factor that we have to consider')
+st.write('5. The body mass index has a small impact in the probability of ending on the UCI')
+
+st.subheader('Conclusions about the performance of the different models')
 st.write('The next table displays the models that have worked better for the project')
 taula=pd.DataFrame({'Yes':[0.82,0.73,0.55,0.73,0.73,0.81],'No':[0.60,0.70,0.54,0.76,0.63,0.51]})
 taula.index=['Logistic reg. with waw data and predictors','Logistic reg. Upsampled','Logistic reg. SMOTENC','R.F. Upsampling','R.F. SMOTENC','Neural Network SMOTENC']
 st.table(taula)
-st.write('')
+st.write('The first model has good results but we can not relly on this model because there is a high risk of overfitting. The model that seems to have the best results is Random Forest with the upsampled training set or the neural network in the case of the patients that will suffer complications. We would suggest the hospital to use a mix of the two models for predicting.')
