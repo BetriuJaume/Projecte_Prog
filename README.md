@@ -1,1 +1,1 @@
-# This is the final project for the Programming course UniVR
+This is the final project for the Programming course UniVR. Here you will find the main file for the Streamlit presentation in the file Projecte.py, some auxiliary functions for the project in the file auxiliary_functions.py, the code for the Neural Networks and Random Forest in the Jupyter Notebook RandomForest_Code_and_NN.ipynb
