@@ -3,7 +3,7 @@ import pandas as pd
 import pyreadstat
 import streamlit as st
 import seaborn as sns
-import auxiliary_functions as af
+import auxiliary_functions as af #Set of functions generated to clean a liitle bit the code of the project
 import matplotlib.pyplot as plt
 from scipy.stats import chisquare
 from scipy.stats import chi2_contingency
@@ -14,17 +14,19 @@ from imblearn.over_sampling import SMOTENC
 
 primaryColor="#F63366"
 
-st.title('Machine and Deep learning techinques to predict the severity of symptoms in Covid patients')
+st.title('Machine and Deep learning techniques to predict the severity of symptoms in Covid patients')
 st.subheader('Programming project')
 st.subheader('Jaume Betriu, Verona February 2022')
 dades=pd.read_spss(r'C:\Users\Jaume\Desktop\Exactes\Projecte_Prog\EarlyLifeCovidPACIENTES V6 ID.sav')
 
-st.write('Our database consists on data about patients from the Hospital Clínic de Barcelona and our objective will be to build a machine learning model capable of predicting the severity of symtoms of the disease in patients')
+st.subheader('Introduction and Objectives of the Project')
+
+st.write('Our database consists of data about patients from the Hospital Clínic de Barcelona and our objective will be to build a machine learning model capable of predicting the severity of symptoms of the disease in patients. We will complement and validate the part of the data exploration with the machine learning section to see if the predictors have a real statistical impact in the UCI variable')
 st.write('The original Data Base looks like this:')
 with st.expander('Show original data'):
   st.write(dades.head(10))
 
-st.write('The first thing we will do is translate to english the data. The translated data set is:')
+st.write('The first thing we will do is translate the data to English. The translated data set is:')
 
 dades['Tabaco_SIno']=dades['Tabaco_SIno'].apply(af.canvi_tab)
 dades['UCI']=dades['UCI'].apply(af.canvi_UCI)
@@ -45,8 +47,8 @@ with st.expander('Information about the columns'):
   st.header('Brief explanation of the variables')
   st.write('If we look at the columns we will see that we have information about:')
   st.write('1. **ID**: Identification of the patient')
-  st.write('2. **UCI**: If the patient ended in the Unitat de Cures Intensives, Intensive Care Unit in english')
-  st.write('3. **IUGR_missing**: We will not use this column beacuse it does not have any information')
+  st.write('2. **UCI**: If the patient ended in the Unitat de Cures Intensives, Intensive Care Unit in English')
+  st.write('3. **IUGR_missing**: We will not use this column because it does not have any information')
   st.write('4. **Age**')
   st.write('5. **Gender**')
   st.write('6. **Size**: Size of the patient')
@@ -56,9 +58,9 @@ with st.expander('Information about the columns'):
   st.write('10. **BW**: Birth weight of the patient')
   st.write('11. **BW_2500**: If the birth weight of the patient was normal or not')
   st.write('12. **percentil_birth**')
-  st.write('13. **IUGR_calc**: Intrauterina Growth Restriction')
+  st.write('13. **IUGR_calc**: Intrauterine Growth Restriction')
   st.write('14. **Tobacco_yes_no**: Smoking habit present during the life of the patient?')
-  st.write('15.-25. Has the patient suffered any disease related to the name of the column?')
+  st.write('15. - 25.   Has the patient suffered any disease related to the name of the column?')
   st.write('17. **DM**: Diabetes Mellitus')
 
   st.header('Information about null values:')
@@ -68,7 +70,7 @@ with st.expander('Information about the columns'):
   st.write('* The dataset has no null values')
 
 st.header('Initial exploration of the data:')
-st.write('First we want to know how the variables are distributed and extract some information from them:')
+st.write('First, we want to know how the variables are distributed and extract some information from them:')
 col_1, col_2=st.columns(2)
 with col_1:
   st.write('Histogram of the variable **Age**:')
@@ -82,7 +84,7 @@ with col_2:
   st.write(fig)
 
 st.write('* We can see that the data is pretty well distributed between the ages of 25 and 65. This means that we have a good statistical sample regarding the age.')
-st.write('* With the Weight we have a mean arround 70  witch makes sense. It will be better to divide between mean and woman to get better information')
+st.write('* With the Weight we have the mean around 70  which makes sense. It will be better to divide between the mean and woman to get better information')
   
 col_3, col_4=st.columns(2)
 with col_3:
@@ -97,8 +99,8 @@ with col_4:
   sns.boxplot(x='Gender',y='IMC',data=dades,palette=sns.color_palette())
   st.write(fig)
 
-st.write('* As we expected we see an increase on the **weight** of men')
-st.write('* The mean of **weight** in men is arround 82 kg wich is a little higher than the Spanish mean that is arround 75.8 kg. This increase could be related with the fact that our data tends to have more individuals in the age ranges of 45 to 65')
+st.write('* As we expected, we see an increase in the **weight** of men')
+st.write('* The mean **weight** in men is around 82 kg, which is a little higher than the Spanish mean that is around 75.8 kg. This increase could be related to the fact that our data tends to have more individuals in the age ranges of 45 to 65')
 st.write('* Exactly the same situation happens with women')
 
 st.title('Study of the weight of the patients in relation with complications during pregnancy')
@@ -107,8 +109,8 @@ fig, ax=plt.subplots(figsize=(10,6))
 sns.boxplot(y='Weight',x='BW_2500',data=dades,hue='IUGR_calc',palette=sns.color_palette("Paired"))
 st.write(fig)
 st.write('* We can clearly  see that those patients who had a **normal birth weight** and no **IUGR** tend to have a higher weight')
-st.write('* In the case of patients with abnormal **BW** we can see that suffering **IUGR** does not have significant impact in the future **weight**')
-st.write('* As a general conclusion **both pregnancy complications lead to a decrease of the weight of the patient during the adulthood**')
+st.write('* In the case of patients with abnormal **BW** we can see that suffering **IUGR** does not have a significant impact in the future **weight**')
+st.write('* As a general conclusion, **both pregnancy complications lead to a decrease of the weight of the patient during the adulthood**')
 
 st.header('Relation of the categorical variables of the data set with **UCI**')
 
@@ -128,12 +130,13 @@ for i in range(llista_dades1.shape[0]):
 st.write(fig)
 st.write('Looking at this plot we can highlight:')
 st.write('1. **Tobacco consumption** has an impact on the probability of ending in the *UCI* in the case that you get COVID but is not as high as we might have expected')
-st.write('2. **Heart diseases, Diabetes, Dyslipidemia, Cancer, Infectious** and **Intrauterina Growth Restriction** seem to have an impact on the probability of ending in the UCI')
-st.write('3. **Hipertension** and **Kidney disease** have a huge negative inpact in the probability of ending up in the UCI')
-st.write('4. **Obesity, Autoimune diseases, Tyroid diseases** and **Psychiatric diseases** seem to have little or no relation with the probability of suffering severe symptoms')
-st.write('5. **Gender** has a huge impact, beeing men who have the highest probability')
+st.write('2. **Heart diseases, Diabetes, Dyslipidemia, Cancer, Infectious** and **Intrauterine Growth Restriction** seem to have an impact on the probability of ending in the UCI')
+st.write('3. **Hypertension** and **Kidney disease** have a huge negative impact on the probability of ending up in the UCI')
+st.write('4. **Obesity, Autoimmune diseases, Thyroid diseases** and **Psychiatric diseases** seem to have little or no relation with the probability of suffering severe symptoms')
+st.write('5. **Gender** has a huge impact, being men who have the highest probability')
 st.write('6. **BW_2500** has a big impact too, meaning that **if your body weight when you were born was lower than normal (2500 grams) the probability of ending at the UCI will be higher**')
 
+st.write('We will contrast in the machine learning part if this relations have any statistical significance to understand better our data')
 st.header('Correlation between continuous variables:')
 dades.drop('IUGR_missing',axis=1)
 correlation=dades.loc[:,'Age':].corr()
@@ -149,7 +152,7 @@ st.write('1. **Weight-Size**')
 st.write('2. **Weight-IMC**')
 st.write('3. **Percentile birth-Birth weight**')
 
-st.write('This shows that the **percentile_birth** has been calculated using data from a bigger dataset')
+st.write('This shows that the **percentile_birth** has been calculated using data from a bigger data set')
 
 st.header('Correlation between categorical variables')
 
@@ -179,7 +182,7 @@ with st.expander('See here the heatmap of the p-values'):
   mask = np.triu(np.ones_like(p_values, dtype=np.bool))
   for i in range(mask.shape[0]):
     mask[i,i]=False
-    fig, ax=plt.subplots(figsize=(15,7))
+    fig, ax=plt.subplots(figsize=(20,12))
     sns.heatmap(p_values, mask=mask,annot=True)
   st.write(fig)
 
@@ -192,15 +195,15 @@ sns.heatmap(chi2, mask=mask,annot=True)
 st.write(fig)
 
 st.write('Looking at the heatmap and the p-values heatmap we can get important information about relations between some diseases')
-st.write('1. **IUGR** and **BW_2500** have a huge correlation. Intrauterine growth restriction leads frequently to anormal birth weight')
-st.write('2. **Hipertension** is related to **Kidney disease, Tyroids, Dyslipidemia, Diabetes** and **Heart diseases**')
-st.write('3. **Diabetes** is related with **Dyslipidemia** and **Obesity** as we might have expected')
-st.write('4. **Tobacco** is related obiously to developing some kinf of **cancer**')
-st.write('5. **Hipertension** diseases have a high correlation with the **UCI** variable')
+st.write('1. **IUGR** and **BW_2500** have a huge correlation. Intrauterine growth restriction leads frequently to abnormal birth weight')
+st.write('2. **Hypertension** is related to **Kidney disease, Tyroids, Dyslipidemia, Diabetes** and **Heart diseases**')
+st.write('3. **Diabetes** is related to **Dyslipidemia** and **Obesity** as we might have expected')
+st.write('4. **Tobacco** is related obviously to developing some kind of **cancer**')
+st.write('5. **Hypertension** diseases have a high correlation with the **UCI** variable')
 
 
 st.header('Machine learning modeling of the data')
-st.write('In this part of the project our objective is to use machine learning techinques to predict the severity of symtoms. We will divide our data in a train sample (80 %) and a test sample (20 %) to test if the model works well with unseen data')
+st.write('In this part of the project our objective is to use machine learning techniques to predict the severity of symptoms. We will divide our data in a train sample (80 %) and a test sample (20 %) to test if the model works well with unseen data')
 
 st.code('''dades_train = dades.sample(frac=0.8, random_state=25).drop('ID',axis=1)
 dades_test = dades.drop(dades_train.index).drop('ID',axis=1)''')
@@ -214,7 +217,7 @@ model_log=smf.glm(formula=formula,data=dades_train,family=sm.families.Binomial()
 
 with st.expander('Check the summary of the model: Logistic regression with the raw data'):
   st.write(model_log.summary())
-st.write(' and trying different margins for the probability decision we get this precisions:')
+st.write(' and trying different margins for the probability decision we get these precisions:')
 
 with st.expander('Check the different precisions'):
   prediccions_prob=model_log.predict(dades_test)
@@ -230,22 +233,22 @@ with st.expander('Check the different precisions'):
     st.write(pr_tot)
     st.write('________________________________________________')
 
-st.write('We can see that we get high precisions in the case of the patients that did not suffer big complications during the disease. Unfortunately we get bad results in the accuracy predicting the cases that the patient will end up in the UCI wich is the thing that interests us. The best results that we get with this model are for the margin 0.8')
+st.write('We can see that we get high precisions in the case of the patients that did not suffer big complications during the disease. Unfortunately, we get bad results in the accuracy predicting the cases that the patient will end up in the UCI which is the thing that interests us. The best results that we get with this model are setting the margin 0.8')
 
 col_5,col_6=st.columns(2)
 with col_5:
   st.write('This might be caused because the data that we are exploring is unbalanced:')
-  st.write('Looking at the graphic we can see that we have arround 5 times more patients with no complications that with complications')
+  st.write('Looking at the graphic we can see that we have around 5 times more patients with no complications that with complications')
   st.write('')
 with col_6:
   fig, ax=plt.subplots(figsize=(8,3))
   plt.bar(['No','Si'],[len(dades_train[dades_train['UCI']=='No']),len(dades_train[dades_train['UCI']=='Yes'])],width=0.5,color=['blue','orange'],linewidth=4)
   st.write(fig)
-st.write('In the other hand we have too much predictors for the amount of data that we are using and I am afraid that we might me overfitting the model with the chose of the margin of decision 0.9')
+st.write('On the other hand, we have too much predictors for the amount of data that we are using and I am afraid that we might me overfitting the model with the chose of the margin of decision 0.9')
 
 st.subheader('Resampling to balance the data')
 
-st.write('We will use resampling techniques to balance the data. Specifically we will use **Upsampling** and **SMOTENC**. Once done the resampling we get better balanced data:')
+st.write('We will use resampling techniques to balance the data. Specifically, we will use **Upsampling** and **SMOTENC**. Once done the resampling, we get better balanced data:')
 dades_train_UCI_No=dades_train[dades_train['UCI']=='No']
 dades_train_UCI_Yes=dades_train[dades_train['UCI']=='Yes']
 dades_UCI_Yes_upsampled=resample(dades_train_UCI_Yes,replace=True,n_samples=len(dades_train_UCI_No),random_state=123)
@@ -269,8 +272,8 @@ with col_8:
   st.write(fig)
 
 st.write('Now we will use this new data to train the models')
-st.subheader('Training logistic regresion with the Upsampled data:')
-st.write('First we train the model with all the variables and we will eliminate the ones with a p-value higher than 0.05')
+st.subheader('Training logistic regression with the Upsampled data:')
+st.write('First, we train the model with all the variables and we will eliminate the ones with a p-value higher than 0.05')
 
 model_log_upsampling=smf.glm(formula=formula,data=dades_train_upsampled,family=sm.families.Binomial()).fit()
 with st.expander('Summary of the model'):
@@ -295,10 +298,10 @@ with st.expander('Check the different precisions'):
     st.write(pr_no)
     st.write(pr_tot)
     st.write('________________________________________________')
-st.write('The best results that we get considering that our interest is in predicting tha cases that the patient will end up in the UCI are with a margin of 0.5')
+st.write('The best results that we get considering that our interest is in predicting the cases that the patient will end up in the UCI are with a margin of 0.5')
 
 st.subheader('Training logistic regression with the SMOTENC data:')
-st.write('First we train our model with all the variables and we eliminate the ones with a p-values higher than 0.05')
+st.write('First, we train our model with all the variables and we eliminate the ones with a p-values higher than 0.05')
 
 variables='+'.join(dades_train_SMOTENC.columns.difference(['UCI','BW','IUGR_missing']))
 formula='UCI~'+variables
@@ -306,7 +309,7 @@ model_log_SMOTENC=smf.glm(formula=formula,data=dades_train_SMOTENC,family=sm.fam
 
 with st.expander('Summary of the model'):
   st.write(model_log_SMOTENC.summary())
-st.write('We eliminate the predictors that are not aporting information and we train a new model:')
+st.write('We eliminate the predictors that are not providing information and we train a new model:')
 formula_simplificada_SMOTENC='UCI~BW_2500+Cancer+DM+Dyslipidemia+Gender+Hipertension+Obesity+Psychiatric+Age'
 model_log_SMOTENC_simplificat=smf.glm(formula=formula_simplificada_SMOTENC,data=dades_train_SMOTENC,family=sm.families.Binomial()).fit()
 
@@ -329,12 +332,12 @@ with st.expander('Check the different precisions'):
     st.write('________________________________________________')
 st.write('It looks that this model is not working as good as we expected, but the best results we get are with the margin of 0.7')
 
-st.subheader('Random forest with the library h2o')
-st.write('We will be using the library h2o for the RF model because this library works very well with categorical values. We will train two different models with the two different resampled data and we will be using the same important variables that we got in the logistic regressions. We will use the next hiperparameters:')
+st.subheader('Random Forest with the H2O library')
+st.write('We will be using the library h2o for the RF model because this library works very well with categorical values. We will train two different models with the two different resampled data and we will be using the same important variables that we got in the logistic regressions. We will use the next hyperparameters:')
 st.write('* **ntrees=500**, we will train a high amount of trees to avoid overfitting')
-st.write('* **max_depth=20**, we will set the maximum depth of the trees to be 20 because of the numer of predictors that we have')
+st.write('* **max_depth=20**, we will set the maximum depth of the trees to be 20 because of the number of predictors that we have')
 st.write('* **min_rows=20**, minimum of patients that has to contain a node to split')
-st.write('* **mtries=-1**, the amount of random predictors used to grow the trees is set to p^(1/2) beeing p the number of predictors. This is generaly the best choice for classification problems')
+st.write('* **mtries=-1**, the amount of random predictors used to grow the trees is set to p^(1/2) being p the number of predictors. This is generally the best choice for classification problems')
 
 st.write('If we run the code we get the following results:')
 with st.expander('Results:'):
@@ -348,11 +351,11 @@ with st.expander('Results:'):
   st.write('Precision for the No: 0.6323529411764706')
   st.write('Total precission: 0.6455696202531646')
 
-st.write('**Very important:** The library h2o is not working in VS and I have tried to fix it but nothing seems to work, the code of this part will be in a colab notebook in the repository of the project named **RandomForest_Code and NN**')
+st.write('**Very important:** The library h2o is not working in VS and I have tried to fix it, but nothing seems to work. The code of this part will be in a Colab notebook in the repository of the project named **RandomForest_Code and NN**')
 
 st.header('Deep learning model of the data using Neural Networks (nn)')
-st.write('To end the project we will try to fit a simple neural network to our data to see if we can improve the results. The fist thing we have to do is change the captegorical predictors to numerical ones and create PyTorch tensors from the data')
-st.write('Once done this we will train the network with the upsampled data and SMOTENC data. For the moment we will use all the predictors. If we look at the code we will see that the used activation function for the layer is the ReLu function that is reccomended for classification problems.')
+st.write('To finish the project we will try to fit a simple neural network to our data to see if we can improve the results. The fist thing we have to do is change the categorical predictors to numerical ones and create PyTorch tensors from the data')
+st.write('Once done this we will train the network with the upsampled data and SMOTENC data. For the moment we will use all the predictors. If we look at the code we will see that the used activation function for the layer is the ReLu function that is recommended for classification problems.')
 
 with st.expander('Graphic of the activation ReLU function'):
   x=np.linspace(-10,10,100)
@@ -362,7 +365,7 @@ with st.expander('Graphic of the activation ReLU function'):
   plt.title('ReLU(x)=max(0,x)')
   st.write(fig)
 
-st.write('We will use **ADAM** optimizer with a learing rate of 0.0001 and the **negative logaritmic likehood** for the loss function. Training the model with the diferent data sets and filtering the results that fit better our objective we get the following accuracies:')
+st.write('We will use **ADAM** optimizer with a learning rate of 0.0001 and the **negative logarithmic likelihood** for the loss function. Training the model with the different data sets and filtering the results that fit better our objective we get the following accuracies:')
 with st.expander('Best results of the NN in the validation set'):
   st.write('SMOTENC training set')
   st.write('Accuracy Yes: 0.9 with rep=29')
@@ -372,27 +375,26 @@ with st.expander('Best results of the NN in the validation set'):
   st.write('Accuracy Yes: 0.847457627118644 with rep=26')
   st.write('Accuracy No: 0.5416666666666666 with rep=26')
 
-st.write('We will use this results from the validation set to adjust the hiperparameters of the NN and use the model to get predictions from the test data to get a final accuracy. We chose rep=29. We will consider just the NN trained with the SMOTENC sample because it is the one that works better')
+st.write('We will use these results from the validation set to adjust the hyperparameters of the NN and use the model to get predictions from the test data to get a final accuracy. We chose rep=29. We will consider just the NN trained with the SMOTENC sample because it is the one that works better')
 with st.expander('Results in the Test dataset with rep=29'):
   st.write('Accuracy Yes: 0.8181818181818182 with rep=29')
   st.write('Accuracy No: 0.5147058823529411 with rep=29')
 
-st.write('**Very important:** I have the exact same problem with the library torch in VS so the code for this part will be in a colab notebook in the repository of the project named **RandomForest_Code and NN**')
+st.write('**Very important:** I have the exact same problem with the torch library in VS so the code for this part will be in a Colab notebook in the repository of the project named **RandomForest_Code and NN**')
 
 st.header('Conclusions of the project')
 
-st.write('About the predictors looking at the summary of the upsampling logistic regression we can determine the following:')
-st.write('1. Having a lower birth weight than the expected has a big impact in the probability of suffering complications')
+st.write('About the predictors looking at the summary of the upsampling logistic regression, we can determine the following:')
+st.write('1. Having a lower birth weight than the expected has a big impact on the probability of suffering complications')
 st.write('2. Men are more likely to end up in the UCI if positive of covid')
-st.write('3. Hipertension has a big impact too in the probability of suffering complications')
-st.write('4. Age is obiously a factor that we have to consider')
-st.write('5. The body mass index has a small impact in the probability of ending on the UCI')
+st.write('3. Hypertension has a big impact too in the probability of suffering complications')
+st.write('4. Age is obviously a factor that we have to consider')
+st.write('5. The body mass index has a small impact on the probability of ending on the UCI')
 
 st.subheader('Conclusions about the performance of the different models')
 st.write('The next table displays the models that have worked better for the project')
 taula=pd.DataFrame({'Yes':[0.82,0.73,0.55,0.73,0.73,0.81],'No':[0.60,0.70,0.54,0.76,0.63,0.51]})
 taula.index=['Logistic reg. with waw data and predictors','Logistic reg. Upsampled','Logistic reg. SMOTENC','R.F. Upsampling','R.F. SMOTENC','Neural Network SMOTENC']
 st.table(taula)
-st.write('The first model has good results but we can not relly on this model because there is a high risk of overfitting. The model that seems to have the best results is Random Forest with the upsampled training set or the neural network in the case of the patients that will suffer complications. We would suggest the hospital to use a mix of the two models for predicting.')
-
-st.write('The last conclusion is that Naural Networks have huge predicting potencial and I am sure that with a more deep study and modeling of the Net we could get better precisions for our data. If we just keep trying to train the Network without changing anything due to the randomness of the DataLoader we get precisions better that the ones we already have so that makes me conclude that with more data that might be abailable in the future we can train deep neural networks that can fit the data **up to precisions of 0.9**.')
+st.write('- The first model has good results but we can not rely on this model because there is a high risk of overfitting. The model that seems to have the best results is Random Forest with the upsampled training set or the neural network in the case of the patients that will suffer complications. We would suggest the hospital to use a mix of the two models for predicting.')
+st.write('- The last conclusion is that Naural Networks have huge predicting potential and I am sure that with a deeper study and modeling of the Net we could get better precisions for our data. If we just keep trying to train the Network without changing anything due to the randomness of the DataLoader we get precisions better that the ones we already have, so that makes me conclude that with more data that might be available in the future we can train deep neural networks that can fit the data **up to precisions of 0.9**.')
